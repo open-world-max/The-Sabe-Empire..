@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Sabr Empire | Turn Your Time into Rewards</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     ============================================================ */
+  :root {
+    --black:       #0a0a0b;
+    --charcoal:    #111115;
+    --navy:        #0d1b2e;
+    --navy-card:   #0f1f38;
+    --gold:        #D4AF37;
+    --gold-light:  #f0d060;
+    --gold-dark:   #a88820;
+    --gold-glow:   rgba(212,175,55,0.18);
+    --white:       #f5f5f0;
+    --soft-gold:   #e8d08a;
+    --text-muted:  #8a8a7a;
+    --success:     #2ecc71;
+    --danger:      #e74c3c;
+    --radius:      14px;
+    --radius-sm:   8px;
+    --transition:  0.3s cubic-bezier(0.4,0,0.2,1);
+    --shadow-gold: 0 0 24px rgba(212,175,55,0.22), 0 4px 16px rgba(0,0,0,0.5);
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  /* ============================================================
+     RESET & BASE
+     ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* background particle shimmer */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212,175,55,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 100% 80%, rgba(13,27,46,0.5) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .display { font-family: 'Cinzel', serif; }
+
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { color: var(--gold-light); }
+
+  input, button { font-family: 'Inter', sans-serif; }
+
+  /* ============================================================
+     SCROLLBAR
+     ============================================================ */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--charcoal); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 99px; }
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  .hidden { display: none !important; }
+  .gold { color: var(--gold); }
+  .text-muted { color: var(--text-muted); }
+
+  .card {
+    background: linear-gradient(145deg, var(--navy-card) 0%, #0a1220 100%);
+    border: 1px solid rgba(212,175,55,0.18);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    z-index: 1;
+  }
+
+  .gold-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-light) 100%);
+    color: #0a0a0b;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 0 18px rgba(212,175,55,0.35);
+    text-transform: uppercase;
+  }
+  .gold-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 32px rgba(212,175,55,0.55);
+    filter: brightness(1.08);
+  }
+  .gold-btn:active { transform: translateY(0); }
+
+  .outline-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+  }
+  .outline-btn:hover {
+    background: var(--gold-glow);
+    box-shadow: 0 0 14px rgba(212,175,55,0.3);
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toast {
+    min-width: 280px;
+    max-width: 360px;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    animation: slideIn 0.35s ease forwards;
+    box-shadow: var(--shadow-card);
+  }
+  .toast.success { background: #0d2b1a; border-left: 4px solid var(--success); color: #a8f0c6; }
+  .toast.error   { background: #2b0d0d; border-left: 4px solid var(--danger);  color: #f0a8a8; }
+  .toast.info    { background: var(--navy-card); border-left: 4px solid var(--gold); color: var(--soft-gold); }
+  .toast i { margin-top: 2px; flex-shrink: 0; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; transform: translateX(30px); }
+  }
+
+  /* ============================================================
+     LOGIN SCREEN
+     ============================================================ */
+  #auth-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  #auth-screen::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(212,175,55,0.1) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 30% at 80% 90%, rgba(13,27,46,0.7) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 48px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .auth-logo .crown {
+    font-size: 2.6rem;
+    display: block;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(212,175,55,0.6));
+  }
+  .auth-logo h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+  }
+  .auth-logo p {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    margin-bottom: 28px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+    margin-bottom: -1px;
+  }
+  .auth-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  .auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--soft-gold);
+  }
+  .field-group input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,175,55,0.22);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--white);
+    font-size: 0.92rem;
+    transition: var(--transition);
+    outline: none;
+    width: 100%;
+  }
+  .field-group input::placeholder { color: var(--text-muted); }
+  .field-group input:focus {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.06);
+    box-shadow: 0 0 14px rgba(212,175,55,0.18);
+  }
+
+  .auth-form .gold-btn { width: 100%; justify-content: center; margin-top: 6px; padding: 14px; font-size: 0.95rem; }
+
+  .auth-divider {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .auth-divider span { color: var(--gold); cursor: pointer; font-weight: 600; }
+  .auth-divider span:hover { color: var(--gold-light); }
+
+  /* ============================================================
+     MAIN APP (hidden until login)
+     ============================================================ */
+  #main-app { display: none; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* ============================================================
+     HEADER / NAV
+     ============================================================ */
+  #header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10,10,11,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding: 0 24px;
+  }
+
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .nav-logo .logo-crown { font-size: 1.4rem; filter: drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .points-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(13,27,46,0.6) 100%);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 99px;
+    padding: 7px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .points-badge .coin { color: var(--gold); font-size: 1rem; }
+  .points-badge #header-points { color: var(--gold); }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #000;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(212,175,55,0.3);
+  }
+  #header-username { font-weight: 600; font-size: 0.88rem; color: var(--soft-gold); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  #logout-btn {
+    background: transparent;
+    border: 1px solid rgba(231,76,60,0.5);
+    color: #e74c3c;
+    border-radius: var(--radius-sm);
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+    letter-spacing: 0.04em;
+  }
+  #logout-btn:hover { background: rgba(231,76,60,0.12); border-color: #e74c3c; }
+
+  /* ============================================================
+     CONTENT WRAPPER
+     ============================================================ */
+  .content-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+    width: 100%;
+  }
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  .hero {
+    text-align: center;
+    padding: 56px 20px 48px;
+    position: relative;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 99px;
+    padding: 5px 16px;
+    margin-bottom: 20px;
+  }
+
+  .hero h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+  .hero h2 span { color: var(--gold); }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    max-width: 520px;
+    margin: 0 auto 40px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .stat-box {
+    padding: 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .stat-box .stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .stat-box .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-box .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  /* ============================================================
+     SECTION HEADING
+     ============================================================ */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.4), transparent);
+  }
+
+  /* ============================================================
+     TASK ZONE
+     ============================================================ */
+  .task-zone-card { padding: 28px; margin-bottom: 28px; }
+
+  .offerwall-frame {
+    width: 100%;
+    min-height: 380px;
+    background: linear-gradient(160deg, rgba(13,27,46,0.9) 0%, rgba(10,10,11,0.9) 100%);
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .offerwall-frame::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius-sm) + 2px);
+    background: linear-gradient(135deg, rgba(212,175,55,0.15), transparent 40%, rgba(13,27,46,0.3) 60%, rgba(212,175,55,0.1));
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .offerwall-inner { position: relative; z-index: 1; }
+
+  .loading-spinner {
+    width: 52px;
+    height: 52px;
+    border: 3px solid rgba(212,175,55,0.15);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1.2s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .offerwall-placeholder-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .offerwall-placeholder-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    max-width: 340px;
+    line-height: 1.7;
+  }
+  .offerwall-uid-tag {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: rgba(212,175,55,0.5);
+    font-family: monospace;
+    background: rgba(212,175,55,0.06);
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(212,175,55,0.12);
+  }
+
+  /* The real iframe goes here — hidden until activated */
+  #offerwall-iframe { display: none; width: 100%; min-height: 380px; border: none; border-radius: var(--radius-sm); }
+
+  /* ============================================================
+     MAIN GRID: wallet + ad side by side on desktop
+     ============================================================ */
+  .lower-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ============================================================
+     WALLET
+     ============================================================ */
+  .wallet-card { padding: 28px; }
+
+  .wallet-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .wallet-stat {
+    background: rgba(13,27,46,0.6);
+    border: 1px solid rgba(212,175,55,0.14);
+    border-radius: var(--radius-sm);
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .wallet-stat .w-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .wallet-stat .w-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    display: block;
+  }
+  .wallet-stat .w-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+  }
+
+  .rate-notice {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.18);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: var(--soft-gold);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rate-notice i { color: var(--gold); flex-shrink: 0; }
+
+  .wallet-input-group { margin-bottom: 18px; }
+  .wallet-input-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--soft-gold);
+    margin-bottom: 8px;
+  }
+  .wallet-input-group input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(212,175,55,0.22);
+    border-radius: var(--radius-sm);
+    padding: 13px 16px;
+    color: var(--white);
+    font-size: 0.92rem;
+    outline: none;
+    transition: var(--transition);
+  }
+  .wallet-input-group input::placeholder { color: var(--text-muted); }
+  .wallet-input-group input:focus {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.06);
+    box-shadow: 0 0 14px rgba(212,175,55,0.18);
+  }
+
+  #payout-schedule {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  #payout-schedule i { color: var(--gold); }
+
+  /* ============================================================
+     AD CARD
+     ============================================================ */
+  .ad-card { padding: 24px; }
+
+  .ad-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .ad-bonus-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(212,175,55,0.07);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--soft-gold);
+    margin-bottom: 20px;
+  }
+  .ad-bonus-value strong { color: var(--gold); font-size: 1rem; }
+
+  #ad-placeholder {
+    display: none;
+    margin-top: 16px;
+    border: 1px dashed rgba(212,175,55,0.25);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.8;
+    animation: fadeIn 0.4s ease;
+    background: rgba(13,27,46,0.4);
+  }
+  #ad-placeholder .ad-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(212,175,55,0.4);
+    margin-top: 10px;
+    display: block;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  #footer {
+    border-top: 1px solid rgba(212,175,55,0.12);
+    background: rgba(10,10,11,0.96);
+    padding: 28px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+  }
+
+  .footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .footer-links a, .footer-links button {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: var(--transition);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .footer-links a:hover, .footer-links button:hover { color: var(--gold); }
+
+  .disclaimer-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 99px;
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold) !important;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+  .disclaimer-trigger:hover { background: rgba(212,175,55,0.15) !important; }
+
+  .footer-copy {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* ============================================================
+     MODAL
+     ============================================================ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 36px 32px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .modal-header h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.3;
+  }
+  .modal-close {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(231,76,60,0.2); color: #e74c3c; border-color: rgba(231,76,60,0.3); }
+
+  .modal-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+    margin: 0 0 24px;
+  }
+
+  .rules-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .rule-item {
+    display: flex;
+    gap: 14px;
+    background: rgba(13,27,46,0.5);
+    border: 1px solid rgba(212,175,55,0.1);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+  }
+  .rule-number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--gold);
+    flex-shrink: 0;
+    line-height: 1.4;
+    min-width: 28px;
+  }
+  .rule-content h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rule-content h4 i { color: #e74c3c; font-size: 0.8rem; }
+  .rule-content p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+
+  .modal-footer {
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 768px) {
+    .lower-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr; max-width: 320px; }
+    .wallet-breakdown { grid-template-columns: 1fr; }
+    .auth-card { padding: 32px 24px; }
+    .nav-logo span.logo-text { display: none; }
+    #header-username { display: none; }
+    .points-badge { padding: 7px 12px; }
+    .modal-box { padding: 28px 20px; }
+    .content-wrap { padding: 24px 16px 48px; }
+    .hero { padding: 40px 16px 36px; }
+    .task-zone-card, .wallet-card, .ad-card { padding: 20px 16px; }
+  }
+
+  @media (max-width: 420px) {
+    .nav-inner { padding: 0; }
+    #header { padding: 0 16px; }
+    .lower-grid { gap: 16px; }
+    .hero h2 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- ===================================================
+     AUTH SCREEN
+     =================================================== -->
+<div id="auth-screen">
+  <div class="auth-card card">
+
+    <div class="auth-logo">
+      <span class="crown">👑</span>
+      <h1 class="display">The Sabr Empire</h1>
+      <p>Turn Your Time into Rewards</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form" class="auth-form">
+      <div class="field-group">
+        <label for="login-email"><i class="fa fa-envelope"></i> &nbsp;Email / Username</label>
+        <input type="text" id="login-email" placeholder="your@email.com or username" autocomplete="username" />
+      </div>
+      <div class="field-group">
+        <label for="login-password"><i class="fa fa-lock"></i> &nbsp;Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" />
+      </div>
+      <button class="gold-btn" onclick="handleLogin()">
+        <i class="fa fa-crown"></i> Enter the Empire
+      </button>
+      <p class="auth-divider">No account? <span onclick="switchTab('register')">Register here →</span></p>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-form" class="auth-form hidden">
+      <div class="field-group">
+        <label for="reg-name"><i class="fa fa-user"></i> &nbsp;Full Name</label>
+        <input type="text" id="reg-name" placeholder="Your full name" autocomplete="name" />
+      </div>
+      <div class="field-group">
+        <label for="reg-email"><i class="fa fa-envelope"></i> &nbsp;Email Address</label>
+        <input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email" />
+      </div>
+      <div class="field-group">
+        <label for="reg-password"><i class="fa fa-lock"></i> &nbsp;Create Password</label>
+        <input type="password" id="reg-password" placeholder="Min 6 characters" autocomplete="new-password" />
+      </div>
+      <button class="gold-btn" onclick="handleRegister()">
+        <i class="fa fa-shield-halved"></i> Create My Empire Account
+      </button>
+      <p class="auth-divider">Already a member? <span onclick="switchTab('login')">Login here →</span></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================================================
+     MAIN APP
+     =================================================== -->
+<div id="main-app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <span class="logo-crown">👑</span>
+        <span class="logo-text display">The Sabr Empire</span>
+      </div>
+      <div class="nav-right">
+        <div class="points-badge">
+          <i class="fa fa-coins coin"></i>
+          <span id="header-points">0</span>&nbsp;pts
+        </div>
+        <div class="user-pill">
+          <div class="user-avatar" id="user-avatar-initial">S</div>
+          <span id="header-username">User</span>
+        </div>
+        <button id="logout-btn" onclick="handleLogout()">
+          <i class="fa fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="hero-eyebrow">⚡ Active Empire Session</span>
+    <h2>Welcome to <span>The Sabr Empire</span></h2>
+    <p class="display" style="font-size:0.9rem; color:var(--soft-gold); font-style:italic; margin-bottom:10px;">"Turn Your Time into Rewards"</p>
+    <p>Complete offers, earn points, and claim real money — every Monday.</p>
+
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-box card">
+        <span class="stat-icon">💰</span>
+        <span class="stat-value" id="stat-earned">₹0.00</span>
+        <span class="stat-label">Total Earned</span>
+      </div>
+      <div class="stat-box card">
+        <span class="stat-icon">✅</span>
+        <span class="stat-value" id="stat-tasks">0</span>
+        <span class="stat-label">Tasks Done</span>
+      </div>
+      <div class="stat-box card">
+        <span class="stat-icon">⚡</span>
+        <span class="stat-value" id="stat-session">Live</span>
+        <span class="stat-label">Session</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <div class="content-wrap">
+
+    <!-- TASK ZONE -->
+    <div class="card task-zone-card">
+      <div class="section-title">👑 Empire Task Zone</div>
+
+      <div class="offerwall-frame" id="offerwall-wrapper">
+        <!-- Placeholder shown until TimeWall activates -->
+        <div class="offerwall-inner">
+          <div class="loading-spinner"></div>
+          <div class="offerwall-placeholder-title">Loading TimeWall Offerwall Securely…</div>
+          <div class="offerwall-placeholder-sub">
+            Waiting for Activation Code from Admin.<br />
+            Your unique tracking ID has been generated and is ready to attach.
+          </div>
+          <div class="offerwall-uid-tag" id="tracking-uid-display">
+            Tracking ID: Generating…
+          </div>
+        </div>
+        <!--
+          DEVELOPER NOTE:
+          Replace the placeholder div above with:
+          <iframe id="offerwall-iframe" src="https://your-timewall-url.com?custom_id=USER_UID_HERE"></iframe>
+          The dynamic UID injection is handled by injectOfferwallUID() below.
+        -->
+      </div>
+    </div>
+
+    <!-- LOWER GRID -->
+    <div class="lower-grid">
+
+      <!-- WALLET -->
+      <div class="card wallet-card">
+        <div class="section-title">💎 My Empire Wallet</div>
+
+        <div class="wallet-breakdown">
+          <div class="wallet-stat">
+            <span class="w-label">Total Approved Points</span>
+            <span class="w-value" id="wallet-points">0</span>
+            <span class="w-sub">Points</span>
+          </div>
+          <div class="wallet-stat">
+            <span class="w-label">Estimated Earnings</span>
+            <span class="w-value" id="wallet-inr">₹0.00</span>
+            <span class="w-sub">At 50% rule</span>
+          </div>
+        </div>
+
+        <div class="rate-notice">
+          <i class="fa fa-circle-info"></i>
+          Payout Rate: <strong style="color:var(--gold); margin-left:4px;">1,000 pts = ₹4.25</strong> &nbsp;(50% Rule Applied)
+        </div>
+
+        <!-- Withdrawal Lock Progress -->
+        <div id="withdraw-lock-box" style="background:rgba(231,76,60,0.08); border:1px solid rgba(231,76,60,0.25); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <span style="font-size:0.78rem; font-weight:700; color:#e74c3c; text-transform:uppercase; letter-spacing:0.08em;">
+              <i class="fa fa-lock"></i> &nbsp;Withdrawal Locked
+            </span>
+            <span style="font-size:0.78rem; color:var(--text-muted);">
+              <span id="lock-current">0</span> / 5,000 pts
+            </span>
+          </div>
+          <div style="background:rgba(255,255,255,0.06); border-radius:99px; height:8px; overflow:hidden;">
+            <div id="lock-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg, #e74c3c, var(--gold)); border-radius:99px; transition:width 0.6s ease;"></div>
+          </div>
+          <p style="font-size:0.74rem; color:var(--text-muted); margin-top:8px;">
+            Earn <strong style="color:var(--soft-gold);" id="lock-needed">5,000</strong> more points to unlock withdrawal.
+          </p>
+        </div>
+
+        <div id="withdraw-unlock-box" class="hidden" style="background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.25); border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:18px; display:none;">
+          <span style="font-size:0.82rem; font-weight:700; color:#2ecc71;">
+            <i class="fa fa-lock-open"></i> &nbsp;Withdrawal Unlocked! You can now submit a payout request.
+          </span>
+        </div>
+
+        <div class="wallet-input-group">
+          <label for="upi-input">
+            <i class="fa fa-mobile-screen-button"></i> &nbsp;PhonePe / GPay / UPI ID
+          </label>
+          <input
+            type="text"
+            id="upi-input"
+            placeholder="9876543210 or name@upi"
+          />
+        </div>
+
+        <button id="payout-btn" class="gold-btn" style="width:100%; justify-content:center; opacity:0.45; cursor:not-allowed;" onclick="submitPayout()" disabled>
+          <i class="fa fa-lock"></i> Submit Payout Request
+        </button>
+
+        <p id="payout-schedule">
+          <i class="fa fa-calendar-check"></i>
+          Payouts processed every <strong style="color:var(--soft-gold);">Monday 8 PM – 10 PM IST</strong>
+        </p>
+      </div>
+
+      <!-- AD CARD -->
+      <div class="card ad-card">
+        <div class="section-title">💎 Bonus Points</div>
+
+        <div class="ad-bonus-value">
+          <i class="fa fa-star" style="color:var(--gold);"></i>
+          Earn <strong>+50 pts</strong> per ad viewed
+        </div>
+
+        <p class="ad-info">
+          Sponsor ads help us keep the platform free and rewarding. Click to view an ad and earn bonus points — no auto-play, always your choice.
+        </p>
+
+        <button class="gold-btn" style="width:100%; justify-content:center;" onclick="showAd()">
+          <i class="fa fa-play-circle"></i> Click to View Sponsor Ad
+        </button>
+
+        <!-- Ad container — shown on click -->
+        <div id="ad-placeholder">
+          <!-- PASTE GOOGLE ADSENSE CODE HERE LATER -->
+          <!-- Example:
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+            <ins class="adsbygoogle" ...></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          -->
+          <i class="fa fa-rectangle-ad" style="font-size:2rem; color:rgba(212,175,55,0.3); display:block; margin-bottom:10px;"></i>
+          Sponsor ad will display here.<br />
+          <em style="color:rgba(212,175,55,0.4);">(AdSense code not yet activated)</em>
+          <span class="ad-label">Ad Slot — Replace with real AdSense block above</span>
+        </div>
+      </div>
+
+    </div><!-- /lower-grid -->
+  </div><!-- /content-wrap -->
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="footer-inner">
+      <div class="footer-logo display">👑 The Sabr Empire</div>
+      <div class="footer-links">
+        <button class="disclaimer-trigger" onclick="openModal('rules-modal')">
+          ⚠️ Read Empire Rules &amp; Disclaimer
+        </button>
+      </div>
+      <p class="footer-copy">© 2025 The Sabr Empire. All rights reserved. Payout decisions are final.</p>
+    </div>
+  </footer>
+
+</div><!-- /main-app -->
+
+<!-- ===================================================
+     RULES MODAL
+     =================================================== -->
+<div class="modal-overlay hidden" id="rules-modal" onclick="closeModalOnOverlay(event, 'rules-modal')">
+  <div class="modal-box card">
+    <div class="modal-header">
+      <h3>📜 Empire Rules &amp; Disclaimer</h3>
+      <button class="modal-close" onclick="closeModal('rules-modal')" aria-label="Close"><i class="fa fa-xmark"></i></button>
+    </div>
+    <div class="modal-divider"></div>
+
+    <div class="rules-list">
+      <div class="rule-item">
+        <div class="rule-number">01</div>
+        <div class="rule-content">
+          <h4><i class="fa fa-ban"></i> No VPN / Proxy Allowed</h4>
+          <p>Using any VPN, proxy, or IP-masking tool will trigger an automatic, permanent account ban. All earnings will be forfeited immediately.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-number">02</div>
+        <div class="rule-content">
+          <h4><i class="fa fa-user-slash"></i> One Device, One Account</h4>
+          <p>Each person is allowed one account only. Duplicate or multi-profile registrations will result in permanent suspension and all accumulated points will be voided.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-number">03</div>
+        <div class="rule-content">
+          <h4><i class="fa fa-shield-halved"></i> Approved Points Only</h4>
+          <p>Points are only credited after approval by the TimeWall Master Dashboard. Rejected, incomplete, or fraudulent tasks will not be credited or paid out, no exceptions.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-number">04</div>
+        <div class="rule-content">
+          <h4><i class="fa fa-calendar-days"></i> Monday Payout Window</h4>
+          <p>Payouts are processed strictly on Monday evenings (8 PM – 10 PM IST). Late submissions are moved to the following week. Admin decisions are final and binding.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="gold-btn" onclick="closeModal('rules-modal')">
+        <i class="fa fa-circle-check"></i> I Understand — Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================
+     JAVASCRIPT
+     =================================================== -->
+<script>
+
+  /* ============================================================
+     APP STATE
+     ============================================================ */
+  const AppState = {
+    currentUser: null,   // { uid, name, email }
+    points: 0,
+    tasksCompleted: 0,
+    adViewed: false,
+  };
+
+  /* ============================================================
+     FIREBASE PLACEHOLDER
+     ============================================================
+     TODO: Replace the config below with your real Firebase project config.
+     Then uncomment the Firebase SDK imports at the top of the file.
+     ============================================================ */
+  const firebaseConfig = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT.firebaseapp.com",
+    projectId:         "YOUR_PROJECT_ID",
+    storageBucket:     "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID"
+  };
+
+  /**
+   * initFirebase()
+   * Call this once you have the real Firebase SDK loaded.
+   * import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-app.js";
+   * import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "...firebase-auth.js";
+   * import { getFirestore, doc, setDoc, getDoc } from "...firebase-firestore.js";
+   */
+  function initFirebase() {
+    // const app  = initializeApp(firebaseConfig);
+    // const auth = getAuth(app);
+    // const db   = getFirestore(app);
+    console.log("[Firebase] Placeholder initialized. Add real SDK to activate.");
+  }
+
+  /**
+   * onFirebaseLogin(email, password) → Promise<{ uid, name }>
+   * Replace with real: await signInWithEmailAndPassword(auth, email, password)
+   */
+  async function onFirebaseLogin(email, password) {
+    // Real implementation:
+    // const cred = await signInWithEmailAndPassword(auth, email, password);
+    // const snap = await getDoc(doc(db, "users", cred.user.uid));
+    // return { uid: cred.user.uid, name: snap.data()?.name };
+    return simulateAuth(email);
+  }
+
+  /**
+   * onFirebaseRegister(name, email, password) → Promise<{ uid, name }>
+   * Replace with real: await createUserWithEmailAndPassword(auth, email, password)
+   *                    then setDoc(doc(db, "users", uid), { name, email, createdAt })
+   */
+  async function onFirebaseRegister(name, email, password) {
+    // const cred = await createUserWithEmailAndPassword(auth, email, password);
+    // await setDoc(doc(db, "users", cred.user.uid), { name, email, createdAt: new Date() });
+    // return { uid: cred.user.uid, name };
+    return simulateAuth(email, name);
+  }
+
+  /**
+   * onFirebaseLogout()
+   * Replace with real: await auth.signOut()
+   */
+  async function onFirebaseLogout() {
+    // await auth.signOut();
+    console.log("[Firebase] User signed out.");
+  }
+
+  /**
+   * savePayoutRequest(uid, points, upi)
+   * Replace with real Firestore write:
+   * await setDoc(doc(db, "payout_requests", Date.now().toString()), { uid, points, upi, ts: new Date() })
+   */
+  async function savePayoutRequest(uid, points, upi) {
+    // await addDoc(collection(db, "payout_requests"), { uid, points, upi, status: "pending", createdAt: serverTimestamp() });
+    console.log("[Firestore] Payout request saved:", { uid, points, upi });
+  }
+
+  /* ============================================================
+     SIMULATED AUTH (remove when real Firebase is wired)
+     ============================================================ */
+  function simulateAuth(email, name) {
+    const uid = "UID_" + btoa(email).replace(/[^a-zA-Z0-9]/g, "").substring(0, 12).toUpperCase();
+    const displayName = name || email.split("@")[0];
+    return { uid, name: displayName };
+  }
+
+  /* ============================================================
+     UID → OFFERWALL URL INJECTION
+     ============================================================ */
+  function injectOfferwallUID(uid) {
+    /**
+     * TIMEWALL INTEGRATION:
+     * Once you have your TimeWall publisher URL, replace the base URL below.
+     * The ?custom_id= parameter will pass the Firebase UID for tracking.
+     *
+     * Example:
+     * const offerwallURL = `https://wall.timewall.io/YOUR_PUBLISHER_ID?custom_id=${uid}`;
+     * const iframe = document.getElementById("offerwall-iframe");
+     * iframe.src = offerwallURL;
+     * document.getElementById("offerwall-wrapper").innerHTML = "";
+     * document.getElementById("offerwall-wrapper").appendChild(iframe);
+     * iframe.style.display = "block";
+     */
+    const trackingTag = document.getElementById("tracking-uid-display");
+    if (trackingTag) {
+      trackingTag.textContent = "Tracking ID: " + uid + " ✓";
+      trackingTag.style.color = "rgba(212,175,55,0.9)";
+    }
+    console.log("[TimeWall] Injected UID:", uid);
+    console.log("[TimeWall] Full URL would be: https://your-timewall-url.com?custom_id=" + uid);
+  }
+
+  /* ============================================================
+     AUTH TAB SWITCH
+     ============================================================ */
+  function switchTab(tab) {
+    document.getElementById("tab-login").classList.toggle("active", tab === "login");
+    document.getElementById("tab-register").classList.toggle("active", tab === "register");
+    document.getElementById("login-form").classList.toggle("hidden", tab !== "login");
+    document.getElementById("register-form").classList.toggle("hidden", tab !== "register");
+  }
+
+  /* ============================================================
+     LOGIN
+     ============================================================ */
+  async function handleLogin() {
+    const email    = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    if (!email) { showToast("Please enter your email or username.", "error"); return; }
+    if (password.length < 6) { showToast("Password must be at least 6 characters.", "error"); return; }
+
+    try {
+      const user = await onFirebaseLogin(email, password);
+      AppState.currentUser = user;
+      bootDashboard(user);
+      showToast("Welcome back, " + user.name + "! 👑", "success");
+    } catch (err) {
+      showToast("Login failed: " + (err.message || "Unknown error"), "error");
+    }
+  }
+
+  /* ============================================================
+     REGISTER
+     ============================================================ */
+  async function handleRegister() {
+    const name     = document.getElementById("reg-name").value.trim();
+    const email    = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+
+    if (!name)            { showToast("Please enter your full name.",         "error"); return; }
+    if (!email || !email.includes("@")) { showToast("Please enter a valid email.",  "error"); return; }
+    if (password.length < 6) { showToast("Password must be at least 6 characters.", "error"); return; }
+
+    try {
+      const user = await onFirebaseRegister(name, email, password);
+      AppState.currentUser = user;
+      bootDashboard(user);
+      showToast("Empire account created! Welcome, " + user.name + " 🎖️", "success");
+    } catch (err) {
+      showToast("Registration failed: " + (err.message || "Unknown error"), "error");
+    }
+  }
+
+  /* ============================================================
+     BOOT DASHBOARD
+     ============================================================ */
+  function bootDashboard(user) {
+    // Hide auth, show app
+    document.getElementById("auth-screen").classList.add("hidden");
+    const app = document.getElementById("main-app");
+    app.style.display = "flex";
+    app.style.flexDirection = "column";
+
+    // Update header
+    const initial = user.name.charAt(0).toUpperCase();
+    document.getElementById("user-avatar-initial").textContent = initial;
+    document.getElementById("header-username").textContent = user.name;
+
+    // Inject UID into offerwall
+    injectOfferwallUID(user.uid);
+
+    // Set initial wallet/lock state
+    updateWallet();
+
+    // Start live session timer
+    startSessionTimer();
+
+    // Start point counter animation
+    animateCounter("header-points", 0, AppState.points, 1000);
+  }
+
+  /* ============================================================
+     LOGOUT
+     ============================================================ */
+  async function handleLogout() {
+    await onFirebaseLogout();
+    AppState.currentUser = null;
+    AppState.points = 0;
+    AppState.tasksCompleted = 0;
+    AppState.adViewed = false;
+
+    // Reset forms
+    document.getElementById("login-email").value    = "";
+    document.getElementById("login-password").value = "";
+    document.getElementById("reg-name").value       = "";
+    document.getElementById("reg-email").value      = "";
+    document.getElementById("reg-password").value   = "";
+    document.getElementById("upi-input").value      = "";
+    document.getElementById("ad-placeholder").style.display = "none";
+
+    // Show auth
+    document.getElementById("main-app").style.display = "none";
+    document.getElementById("auth-screen").classList.remove("hidden");
+    switchTab("login");
+
+    showToast("Logged out successfully. See you Monday! 💰", "info");
+  }
+
+  /* ============================================================
+     PAYOUT REQUEST
+     ============================================================ */
+  async function submitPayout() {
+    const upi    = document.getElementById("upi-input").value.trim();
+    const points = AppState.points;
+
+    if (!upi) {
+      showToast("Please enter your PhonePe / GPay / UPI ID.", "error");
+      return;
+    }
+
+    if (points < 5000) {
+      const needed = 5000 - points;
+      showToast(`🔒 Minimum 5,000 points required to withdraw. You need ${needed.toLocaleString()} more points!`, "error", 5000);
+      return;
+    }
+
+    // Save to Firestore (placeholder)
+    if (AppState.currentUser) {
+      await savePayoutRequest(AppState.currentUser.uid, points, upi);
+    }
+
+    const inr = ((points / 1000) * 4.25).toFixed(2);
+
+    showToast(
+      `Payout Request of ${points.toLocaleString()} Points (≈₹${inr}) submitted! Processed Monday 8–10 PM. ✅`,
+      "success",
+      6000
+    );
+  }
+
+  /* ============================================================
+     AD DISPLAY
+     ============================================================ */
+  function showAd() {
+    const ad = document.getElementById("ad-placeholder");
+    ad.style.display = "block";
+    showToast("Sponsor ad loaded! Earn real points by completing tasks in the Task Zone. 👆", "info");
+  }
+
+  /* ============================================================
+     POINTS UTILS
+     ============================================================ */
+  function addPoints(amount) {
+    const prev = AppState.points;
+    AppState.points += amount;
+    AppState.tasksCompleted += 1;
+    updateWallet();
+    animateCounter("header-points", prev, AppState.points, 800);
+    animateCounter("stat-tasks", AppState.tasksCompleted - 1, AppState.tasksCompleted, 500);
+  }
+
+  function updateWallet() {
+    const pts = AppState.points;
+    const inr = ((pts / 1000) * 4.25).toFixed(2);
+    document.getElementById("wallet-points").textContent = pts.toLocaleString();
+    document.getElementById("wallet-inr").textContent    = "₹" + inr;
+    document.getElementById("stat-earned").textContent   = "₹" + inr;
+    document.getElementById("header-points").textContent = pts.toLocaleString();
+
+    // Update withdrawal lock UI
+    const MIN = 5000;
+    const pct  = Math.min((pts / MIN) * 100, 100);
+    const needed = Math.max(MIN - pts, 0);
+    const lockBox   = document.getElementById("withdraw-lock-box");
+    const unlockBox = document.getElementById("withdraw-unlock-box");
+    const payBtn    = document.querySelector("#payout-btn");
+
+    document.getElementById("lock-current").textContent = pts.toLocaleString();
+    document.getElementById("lock-progress-bar").style.width = pct + "%";
+    document.getElementById("lock-needed").textContent = needed.toLocaleString();
+
+    if (pts >= MIN) {
+      lockBox.style.display   = "none";
+      unlockBox.style.display = "block";
+      if (payBtn) { payBtn.disabled = false; payBtn.style.opacity = "1"; payBtn.style.cursor = "pointer"; payBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Submit Payout Request'; }
+    } else {
+      lockBox.style.display   = "block";
+      unlockBox.style.display = "none";
+      if (payBtn) { payBtn.disabled = true; payBtn.style.opacity = "0.45"; payBtn.style.cursor = "not-allowed"; }
+    }
+  }
+
+  /* ============================================================
+     COUNTER ANIMATION
+     ============================================================ */
+  function animateCounter(id, from, to, duration) {
+    const el    = document.getElementById(id);
+    if (!el) return;
+    const start = performance.now();
+    const range = to - from;
+    function step(now) {
+      const elapsed  = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease     = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = Math.round(from + range * ease).toLocaleString();
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ============================================================
+     SESSION TIMER
+     ============================================================ */
+  function startSessionTimer() {
+    let secs = 0;
+    const el = document.getElementById("stat-session");
+    setInterval(() => {
+      secs++;
+      const m = Math.floor(secs / 60).toString().padStart(2, "0");
+      const s = (secs % 60).toString().padStart(2, "0");
+      el.textContent = m + ":" + s;
+    }, 1000);
+  }
+
+  /* ============================================================
+     MODAL
+     ============================================================ */
+  function openModal(id) {
+    document.getElementById(id).classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  function closeModalOnOverlay(e, id) {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  }
+
+  // Escape key closes any open modal
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal-overlay:not(.hidden)").forEach(m => closeModal(m.id));
+    }
+  });
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  function showToast(message, type = "info", duration = 4000) {
+    const icons = { success: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fa ${icons[type]}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = "fadeOut 0.35s ease forwards";
+      setTimeout(() => toast.remove(), 350);
+    }, duration);
+  }
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  initFirebase();
+
+  // Allow Enter key to submit login/register
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    const loginVisible    = !document.getElementById("login-form").classList.contains("hidden");
+    const registerVisible = !document.getElementById("register-form").classList.contains("hidden");
+    const authHidden      = document.getElementById("auth-screen").classList.contains("hidden");
+    if (authHidden) return;
+    if (loginVisible)    handleLogin();
+    if (registerVisible) handleRegister();
+  });
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDglwTRgE9Uw08TuVYhGOwqnwHJJlN05qs",
+  authDomain: "the-sabr-empire65.firebaseapp.com",
+  projectId: "the-sabr-empire65",
+  storageBucket: "the-sabr-empire65.firebasestorage.app",
+  messagingSenderId: "660616845606",
+  appId: "1:660616845606:web:754873c3a0388372acc9e7",
+  measurementId: "G-JMGE06J752"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+</script>
+</body>
+          </html>
